@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Box,
   Button,
@@ -18,7 +19,7 @@ export default function UserCreate() {
       <Header />
       <Flex w="100%" my="6" maxW={1480} mx="auto" px="6">
         <Sidebar />
-        <Box flex="1" borderRadius={8} bg="gray.800" p="8">
+        <Box flex="1" borderRadius={8} bg="gray.800" p={["6", "8"]}>
           <Heading size="lg" fontWeight="normal">
             Criar usuário
           </Heading>
@@ -42,7 +43,11 @@ export default function UserCreate() {
 
           <Flex justify="flex-end" mt="8">
             <HStack spacing="4">
-              <Button colorScheme="whiteAlpha">Cancelar</Button>
+              <Link href="/users" passHref>
+                <Button as="a" colorScheme="whiteAlpha">
+                  Cancelar
+                </Button>
+              </Link>
               <Button colorScheme="pink">Salvar</Button>
             </HStack>
           </Flex>
