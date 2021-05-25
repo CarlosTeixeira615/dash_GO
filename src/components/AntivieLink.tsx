@@ -20,7 +20,7 @@ export function ActiveLink({
   }
 
   if (
-    (shouldMathchExactHref && asPath.startsWith(String(rest.href))) ||
+    (!shouldMathchExactHref && asPath.startsWith(String(rest.href))) ||
     asPath.startsWith(String(rest.as))
   ) {
     isActive = true;
