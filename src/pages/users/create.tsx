@@ -16,7 +16,10 @@ import { Input } from "../../components/Form/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import { useMutation } from "react-query";
+import { api } from "../../services/api";
+import { queryClient } from "../../services/queryClient";
+import { useRouter } from "next/router";
 interface CreateUserFormData {
   name: string;
   email: string;
@@ -33,22 +36,40 @@ const createUserFormShcema = yup.object().shape({
     .min(6, "A senha precisa ter no minimo 6 caracteres"),
   passwordConfirmation: yup
     .string()
-    .oneOf([null, yup.ref("password")], "As senhas precisam ser iguais"),
+    .oneOf([yup.ref("password"), null], "As senhas precisam ser iguais"),
 });
 
 export default function UserCreate() {
   const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(createUserFormShcema),
   });
+  const router = useRouter();
 
   const { errors } = formState;
 
   const handleCreateUser: SubmitHandler<CreateUserFormData> = async (
     values
   ) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(values);
+    await createUser.mutateAsync(values);
+    router.push("/users");
   };
+
+  const createUser = useMutation(
+    async (user: CreateUserFormData) => {
+      const response = await api.post("users", {
+        user: {
+          ...user,
+          created_at: new Date(),
+        },
+      });
+      return response.data.user;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("user");
+      },
+    }
+  );
 
   return (
     <Box>
@@ -96,7 +117,7 @@ export default function UserCreate() {
               <Input
                 error={errors.passwordConfirmation}
                 {...register("passwordConfirmation")}
-                name="password_confirmation"
+                name="passwordConfirmation"
                 type="password"
                 label="Confirmação da senha"
               />

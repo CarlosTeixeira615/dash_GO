@@ -1,20 +1,32 @@
-import { useQuery } from "react-query";
+import { useQuery, UseQueryOptions, UseQueryResult } from "react-query";
 import { api } from "../api";
 
-interface User {
+type User = {
   id: string;
   name: string;
   email: string;
   created_at: string;
-}
+};
 
-export async function getUsers(): Promise<User[]> {
-  const response = await api.get("/users");
-  const data = await response.data;
+type GetUserResponse = {
+  totalCount: number;
+  users: User[];
+};
+
+export async function getUsers(page: number): Promise<GetUserResponse> {
+  const { data, headers } = await api.get("/users", {
+    params: {
+      page: page,
+    },
+  });
+
+  const totalCount = Number(headers["x-total-count"]);
+
   const users = data.users.map((user) => {
     return {
       id: user.id,
       name: user.name,
+      email: user.email,
       created_at: new Date(user.created_at).toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "long",
@@ -23,11 +35,15 @@ export async function getUsers(): Promise<User[]> {
     };
   });
 
-  return users;
+  return {
+    totalCount,
+    users,
+  };
 }
 
-export function useUsers() {
-  return useQuery("user", getUsers, {
-    staleTime: 1000 * 5, // 5secundos
-  });
+export function useUsers(page: number, options: UseQueryOptions) {
+  return useQuery(["users", page], () => getUsers(page), {
+    staleTime: 1000 * 60 * 10, // 1s*60s*10m = 10 minutes
+    ...options,
+  }) as UseQueryResult<GetUserResponse, unknown>;
 }
