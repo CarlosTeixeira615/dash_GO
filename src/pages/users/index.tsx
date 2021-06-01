@@ -25,7 +25,7 @@ import { Pagination } from "../../components/Pagination";
 import { Sidebar } from "../../components/Sidebar";
 import { api } from "../../services/api";
 
-import { getUsers, useUsers } from "../../services/hooks/useUsers";
+import { useUsers } from "../../services/hooks/useUsers";
 import { queryClient } from "../../services/queryClient";
 
 export default function UserList({ user }) {
@@ -36,9 +36,7 @@ export default function UserList({ user }) {
 
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, error, isFetching } = useUsers(page, {
-    initialData: user,
-  });
+  const { data, isLoading, error, isFetching } = useUsers(page);
 
   async function handlePrefetchUser(userId: string) {
     await queryClient.prefetchQuery(
@@ -148,12 +146,3 @@ export default function UserList({ user }) {
     </Box>
   );
 }
-export const getServerSideProps: GetServerSideProps = async () => {
-  const { users } = await getUsers(1);
-
-  return {
-    props: {
-      users,
-    },
-  };
-};
